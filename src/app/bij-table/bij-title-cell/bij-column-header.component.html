@@ -1,0 +1,9 @@
+<ng-content></ng-content>
+<div class="controls">
+  <button *ngIf="filter" (click)="onActivateFilter()" class="material-icons md-18">search</button>
+  <input *ngIf="filter" #filter_field
+         [formControl]="filterControl"
+         [ngClass]="{'contains-text': !!filter_field.value}"
+         type="search">
+  <button *ngIf="sort" (click)="onSort($event)" class="material-icons md-18">{{sortButtonIcon}}</button>
+</div>

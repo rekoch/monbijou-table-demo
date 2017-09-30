@@ -1,0 +1,28 @@
+@import "../../colors";
+
+:host {
+  position: relative;
+  margin: 2px;
+
+  > div.bij-scrollbar-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+
+    .thumb {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-color: $monbijou-orange-80;
+      border-radius: 5px;
+    }
+  }
+}
+
+:host-context(.horizontal) .thumb {
+  min-width: 20px;
+}
+:host-context(.vertical) .thumb {
+  min-height: 20px;
+}

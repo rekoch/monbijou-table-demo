@@ -1,0 +1,32 @@
+:host {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+
+  display: flex;
+  flex-flow: row nowrap;
+
+  > div {
+    margin: 10px;
+    flex: 1;
+    position: relative;
+    display: flex;
+    flex-flow: column;
+
+    > div.table {
+      flex: auto;
+      overflow: auto;
+      display: flex;
+      flex-flow: column;
+      > * {
+        flex: auto;
+      }
+    }
+
+    > div.buttons {
+      margin-top: 10px;
+    }
+  }
+}

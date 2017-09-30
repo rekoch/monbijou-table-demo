@@ -1,0 +1,65 @@
+@import "colors";
+@import "material-icons";
+
+::ng-deep * {
+  box-sizing: border-box;
+}
+
+:host {
+  display: block;
+  position: relative; // positioned anchor for <div class='bij-viewport'>
+  height: 100%;
+
+  > div.bij-viewport {
+    position: absolute; // viewport must be absolute to respect overflow hidden
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    overflow: hidden;
+
+    > table {
+      border: 1px solid #000000;
+      border-spacing: 0;
+      border-collapse: collapse;
+      width: 100%;
+
+      ::ng-deep {
+        & tr.display-none {
+          display: none;
+        }
+
+        & tr.hidden {
+          visibility: hidden;
+        }
+
+        & th, & td {
+          border: 1px solid #000000;
+          padding: 2px 5px;
+        }
+
+        & th {
+          background-color: $monbijou-orange;
+          vertical-align: top;
+          text-align: left;
+        }
+      }
+    }
+  }
+
+  > bij-scrollbar {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+
+    &.vertical {
+      width: 10px;
+    }
+
+    &.horizontal {
+      left: 0;
+      height: 10px;
+    }
+  }
+}
+

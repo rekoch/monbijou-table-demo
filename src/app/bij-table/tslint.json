@@ -1,0 +1,25 @@
+{
+  "extends": ["tslint:latest", "../../../tslint.json"],
+  "rulesDirectory": [
+    "../../../node_modules/codelyzer"
+  ],
+  "rules": {
+    "directive-selector": [
+      true,
+      "attribute",
+      "bij",
+      "camelCase"
+    ],
+    "component-selector": [
+      true,
+      "element",
+      "bij",
+      "kebab-case"
+    ],
+    "pipe-naming": [
+      true,
+      "camelCase",
+      "bij"
+    ]
+  }
+}

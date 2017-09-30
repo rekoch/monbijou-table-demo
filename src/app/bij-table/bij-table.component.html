@@ -1,0 +1,89 @@
+<div #bij_viewport
+     class="bij-viewport"
+     bijDimension
+     (dimensionChange)="onViewportDimensionChange($event)">
+  <table [bijHorizontalTouchScrollSupport]="horizontalTouchScrollConfig"
+         (horizontalTouchScroll)="onHorizontalTouchScroll($event)"
+         [style.transform]="transform"
+         bijDimension
+         (dimensionChange)="onViewportClientDimensionChange($event)">
+
+    <colgroup *ngIf="tableModel.header">
+      <col *ngFor="let titleCell of tableModel.header.titleCells">
+    </colgroup>
+
+    <!-- Header -->
+    <thead *ngIf="tableModel.header && tableModel.header.visible"
+           bijDimension
+           (dimensionChange)="onTableHeadDimensionChange($event)">
+    <!-- TR -->
+    <ng-container [bijTemplateOutlet]="{templateRef: tableModel.header.trTemplateRef || tr_head_template, context: {$implicit: newTrHeadData(head_row_template)}}">
+
+      <!-- TH header-row-template with TH elements -->
+      <ng-template #head_row_template>
+        <ng-container
+          *ngFor="let titleCell of tableModel.header.titleCells; let cellIndex=index"
+          [bijTemplateOutlet]="{templateRef: titleCell.thTemplateRef || th_template, context: { $implicit: newThData(titleCell, cellIndex)}, identity: cellIndex}">
+        </ng-container>
+      </ng-template>
+    </ng-container>
+    </thead>
+
+    <!-- Body -->
+    <tbody tabindex="-1"
+           (keydown.arrowUp)="onArrowUp()"
+           (keydown.arrowDown)="onArrowDown()"
+           (keydown.pageUp)="onPageUp($event)"
+           (keydown.pageDown)="onPageDown($event)"
+           (keydown.control.home)="onPageHome($event)"
+           (keydown.control.end)="onPageEnd($event)"
+           (touchstart)="onTouchStart()"
+           (touchend)="onTouchEnd()"
+           [bijVerticalTouchScrollSupport]="verticalTouchScrollConfig"
+           (verticalTouchScroll)="onVerticalTouchScroll($event)"
+           bijVerticalWheelScrollSupport
+           (verticalWheelScroll)="onMouseWheel($event)">
+
+    <!-- TR -->
+    <ng-container
+      *ngFor="let row of rows; trackBy: trackByRowFn; let rowIndex=index;"
+      [bijTemplateOutlet]="{templateRef: row.trTemplateRef || tr_template, context: { $implicit: newTrData(row, rowIndex, rowIndex - preservedHiddenRowCount, body_row_template)}, identity: rowIndex}">
+
+      <!-- TD header-row-template with TD elements -->
+      <ng-template #body_row_template>
+        <td *ngFor="let cell of row.cells"><ng-container *ngTemplateOutlet="cell.templateRef"></ng-container></td>
+      </ng-template>
+    </ng-container>
+    </tbody>
+  </table>
+
+  <!-- Default <TR> head template -->
+  <ng-template #tr_head_template let-trHeadData>
+    <tr [bijTrHead]="trHeadData"><ng-template></ng-template></tr>
+  </ng-template>
+
+  <!-- Default <TH> head template -->
+  <ng-template #th_template let-thData>
+    <th [bijTh]="thData"><ng-template></ng-template></th>
+  </ng-template>
+
+  <!-- Default <TR> body template -->
+  <ng-template #tr_template let-trData>
+    <tr [bijTr]="trData"><ng-template></ng-template></tr>
+  </ng-template>
+</div>
+<bij-scrollbar *ngIf="verticalScrollbarVisible"
+               [direction]="ScrollDirection.Vertical"
+               [thumbPosition]="scrollModel.positionRatio"
+               [thumbSize]="scrollModel.rangeRatio"
+               [minScrollRatio]="1 / scrollModel.scrollSize"
+               [style.top.px]="scrollbarTopPx"
+               (scroll)="onVerticalScroll($event)">
+</bij-scrollbar>
+
+<bij-scrollbar *ngIf="horizontalScrollbarVisible"
+               [direction]="ScrollDirection.Horizontal"
+               [thumbPosition]="horizontalScrollThumbPositionRatio"
+               [thumbSize]="horizontalScrollThumbSizeRatio"
+               (scroll)="onHorizontalScroll($event)">
+</bij-scrollbar>
