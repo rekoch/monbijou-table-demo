@@ -3,7 +3,7 @@ import { BijUtils } from '../bij.utils';
 import { BijTitleCellDirective } from './bij-title-cell.directive';
 
 /**
- * Directive to be applied on HTML <TH> elements of {BijTableComponent}.
+ * Directive to be applied on HTML <th> elements of {BijTableComponent}.
  *
  * This directive must be given an instance of {ThData} as its input value.
  */

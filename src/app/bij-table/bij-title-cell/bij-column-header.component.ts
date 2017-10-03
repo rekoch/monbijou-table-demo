@@ -4,6 +4,20 @@ import { Subject } from 'rxjs/Subject';
 import { BijTitleCellDirective } from './bij-title-cell.directive';
 import { SortDirection } from './sort-direction.enum';
 
+/**
+ * Provides a visual representation for a {BijTitleCellDirective}, which allows the user to sort and filter column values.
+ *
+ * Example usage:
+ *
+ * <bij-header>
+ *   <bij-title-cell>
+ *     <ng-template><bij-column-header>firstname</bij-column-header></ng-template>
+ *   </bij-title-cell>
+ *   <bij-title-cell>
+ *     <ng-template [filter]="false"><bij-column-header>lastname</bij-column-header></ng-template>
+ *   </bij-title-cell>
+ * </bij-header>
+ */
 @Component({
   selector: 'bij-column-header',
   templateUrl: './bij-column-header.component.html',

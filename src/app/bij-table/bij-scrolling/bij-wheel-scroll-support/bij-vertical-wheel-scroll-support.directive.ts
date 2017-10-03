@@ -9,7 +9,7 @@ import { WheelScrollEvent } from './wheel-scroll.event';
  * This directive computes the wheel-speed based on the wheel events occurred in the last 50ms.
  * The property 'WheelEvent.wheelDeltaY' cannot be used because not supported by all major browsers.
  *
- * TODO [asa]: Use WheelEvent.deltaY instead
+ * TODO Use WheelEvent.deltaY instead
  */
 @Directive({
   selector: '[bijVerticalWheelScrollSupport]'

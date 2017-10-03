@@ -1,18 +1,18 @@
 /**
  * Specifies the cause of a viewport change.
  */
-export enum BijViewportChangeAction {
+export enum ViewportChangeAction {
   REWIND, FORWARD, GOTO, LAYOUT, DATA_SOURCE, FILTER, SORT, HEADER
 }
 /**
  * Event which is fired upon a change of the visible client area in the viewport.
  */
-export interface BijViewportChangeEvent {
+export interface ViewportChangeEvent {
 
   /**
    * Action which caused this event.
    */
-  action: BijViewportChangeAction;
+  action: ViewportChangeAction;
   /**
    * The new normalized position of the client area in the viewport, and is defined as closed interval [0, 1].
    *
@@ -26,7 +26,7 @@ export interface BijViewportChangeEvent {
    *
    * 1.0: the client area fits completely into the viewport and no scrollbar are shown
    * 0.5: half of the client area fits into the viewport
-   * 0.0: not applicable TODO explain why
+   * 0.0: not applicable
    */
   range: number;
 }

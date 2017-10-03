@@ -4,7 +4,24 @@ import { BijCellDirective } from '../bij-cell';
 import { HeaderInfo } from '../bij-header/bij-header.directive';
 
 /**
- * Represents a row in {BijTableComponent}.
+ * Represents a table row and is similar to the HTML <tr> element.
+ *
+ * The row can be bound to the domain object, which represents the row, via 'element' input property.
+ * This allows to implement custom filtering and sorting based on the domain object properties.
+ *
+ * This modelling directive will not be projected into the DOM, so do not style this element, nor install any event listeners.
+ * Instead, provide your custom template for HTML <tr> tag via 'trTemplateRef' input property.
+ *
+ * Example usage:
+ *
+ * <bij-row *ngFor="let person of persons" [element]="person">
+ *   <bij-cell>
+ *     <ng-template>{{person.firstname}}</ng-template>
+ *   </bij-cell>
+ *   <bij-cell>
+ *     <ng-template>{{person.lastname}}</ng-template>
+ *   </bij-cell>
+ * </bij-row>
  */
 @Directive({
   selector: 'bij-row' // tslint:disable-line:directive-selector
@@ -15,34 +32,31 @@ export class BijRowDirective {
   public cells: QueryList<BijCellDirective>;
 
   /**
-   * Specifies the business object which is represented by this row.
+   * Specifies the domain object which is represented by this row.
    *
-   * This allows to select a row by its business object, or to scroll a row into the viewport by its business object.
+   * This allows to select a row by its domain object, or to scroll a row into the viewport by its domain object.
    *
-   * Further, when associating a business object with the row, this allows to compute the row identity by specifying a {TrackByFunction},
-   * or to apply custom filtering by specifying a {FilterFn}, or to implement custom sorting by specifying a {ComparatorFn}.
+   * Further, when associating a domain object with the row, this allows to compute the row identity by specifying a {TrackByFunction},
+   * or to apply custom filtering by specifying a {FilterFn}, or to implement custom sorting by specifying a {CompareFn}.
    *
-   * See {BijTableComponent} to provide a {TrackByFunction}, or {BijTitleCellDirective} to provide a {FilterFn} or {ComparatorFn}.
+   * See {BijTableComponent} to provide a {TrackByFunction}, or {BijTitleCellDirective} to provide a {FilterFn} or {CompareFn}.
    */
   @Input()
   public element: any;
 
   /**
-   * Specifies an optional {TemplateRef} which is rendered as this row's HTML <TR> tag.
+   * Specifies an optional {TemplateRef} which is rendered as this row's HTML <tr> tag.
    *
-   * A custom template allows to decorate the <TR> element, like to set CSS classes, or to install event listeners.
+   * A custom template allows to decorate the <tr> element, like to set CSS classes, or to install event listeners.
    *
    * The template must fulfill the following requirements:
-   *   - provide an empty 'ng-template' as its DOM child, which acts as the anchor where its <TD> children are inserted
-   *   - apply [bijTr] directive to the <TR> element, with the implicit template variable as its value
+   *   - provide an empty 'ng-template' as its DOM child, which acts as the anchor where its <td> children are inserted
+   *   - apply [bijTr] directive to the <tr> element, with the implicit template variable as its value
    *   - declare the template within the corresponding <bij-table> tag
-   *
-   * See the example below.
    *
    * The template is given the implicit template variable {TrData} to access the associated 'row' and 'rowIndex'.
    *
-   * ----
-   * Example:
+   * Example usage:
    *
    *   <bij-row [trTemplateRef]="tr_template">
    *     <bij-cell>...</bij-cell>

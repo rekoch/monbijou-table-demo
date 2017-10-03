@@ -3,7 +3,7 @@ import { BijUtils } from '../bij.utils';
 import { BijHeaderDirective } from './bij-header.directive';
 
 /**
- * Directive to be applied on HTML <TR> elements of {BijTableComponent} header.
+ * Directive to be applied on HTML <tr> elements of {BijTableComponent} header.
  *
  * This directive must be given an instance of {TrHeadData} as its input value.
  */

@@ -13,10 +13,50 @@ import { WheelScrollEvent } from './bij-scrolling/bij-wheel-scroll-support/wheel
 import { ScrollDirection } from './bij-scrolling/scroll-direction.enum';
 import { ThData } from './bij-title-cell/bij-th.directive';
 import { BijTitleCellDirective } from './bij-title-cell/bij-title-cell.directive';
-import { BijViewportChangeAction, BijViewportChangeEvent } from './bij-viewport-change.event';
 import { TableScrollModel } from './model/table-scroll.model';
 import { TableModel } from './model/table.model';
+import { ViewportChangeAction, ViewportChangeEvent } from './viewport-change.event';
 
+/**
+ * Angular table component on the basis of the native HTML table element.
+ *
+ * Table structure and its data rows are modelled in the template similar to model a native HTML table.
+ * The model is projected into standard HTML table tags. However, only the rows visible in the viewport are
+ * actually rendered into the DOM.
+ *
+ * It features the following functionality:
+ * - virtual scrolling
+ * - support for infinite scrolling
+ * - filtering
+ * - sorting
+ *
+ * Changes to the modelling structure are instantly detected. This allows for straight-forward
+ * implementation of responsive design by using Angular structural directives like *ngIf to adapt
+ * the column structure on dimension change.
+ *
+ * Cell content is specified in the form of a <ng-template>, and allows the usage of arbitrary HTML code.
+ * The <ng-template> indicates an instantiation boundary, and no assumptions about number of times or when the template would be instantiated can be made.
+ *
+ * Domain objects can be bound to their respective rows to facilitate interaction and to implement custom
+ * filtering and sorting.
+ *
+ * Due to limitation of HTML table, vertical scrolling works with discrete row steps, which may not be optimal
+ * for tall rows.
+ *
+ * Example usage:
+ *
+ *   <bij-table>
+ *     <bij-header>
+ *       <bij-title-cell><ng-template>Firstname</ng-template></bij-title-cell>
+ *       <bij-title-cell><ng-template>Lastname</ng-template></bij-title-cell>
+ *     </bij-header>
+ *
+ *     <bij-row *ngFor="let person of persons">
+ *       <bij-cell><ng-template>{{person.firstname}}</ng-template></bij-cell>
+ *       <bij-cell><ng-template>{{person.lastname}}</ng-template></bij-cell>
+ *     </bij-row>
+ *   </bij-table>
+ */
 @Component({
   selector: 'bij-table',
   templateUrl: './bij-table.component.html',
@@ -38,20 +78,32 @@ export class BijTableComponent implements AfterViewInit, OnDestroy {
   private _startElementIdentity: any;
   private _viewportClientTranslateX = 0;
 
-  private _viewportDimension: Dimension = {width: 0, height: 0};
-  private _viewportClientDimension: Dimension = {width: 0, height: 0};
-  private _tableHeadDimension: Dimension = {width: 0, height: 0};
+  private _viewportDimension: Dimension = {
+    offsetWidth: 0,
+    offsetHeight: 0,
+    clientWidth: 0,
+    clientHeight: 0
+  };
+  private _viewportClientDimension: Dimension = {
+    offsetWidth: 0,
+    offsetHeight: 0,
+    clientWidth: 0,
+    clientHeight: 0
+  };
+  private _tableHeadDimension: Dimension = {
+    offsetWidth: 0,
+    offsetHeight: 0,
+    clientWidth: 0,
+    clientHeight: 0
+  };
 
   /**
    * During a touch-gesture this array contains a snapshot of all rows which are in the viewport when the gesture started.
    * Since the gesture's touch events are emitted by an element contained in these rows they need to be kept in the DOM
    * until the gesture is completed. Any modification (i.e. moving/removing these rows) would prevent further touch events
    * and corrupt the gesture.
-   *
-   * During the gesture this.rows() prepends this snapshot to the rows according to the state of the table model and
-   * the scroll model. These preserved rows are hidden in the DOM and only completely removed once the gesture completes.
    */
-  private _preservedHiddenRows: BijRowDirective[] = [];
+  private _gestureSourceRows: BijRowDirective[] = [];
 
   @ViewChild('bij_viewport')
   private set viewport(viewport: ElementRef) {
@@ -63,18 +115,21 @@ export class BijTableComponent implements AfterViewInit, OnDestroy {
     this.tableModel.setHeader(header);
     this.scrollModel.setSize(this.tableModel.filteredRowCount);
     this.scrollModel.setPositionRatio(0);
-    this.updateViewport(BijViewportChangeAction.HEADER);
+    this.updateViewport(ViewportChangeAction.HEADER);
   }
 
   @ContentChildren(BijRowDirective)
   private _rows: QueryList<BijRowDirective>;
 
+  /**
+   * Filters all rows which match the specified filter text in any of their cells.
+   */
   @Input()
   public set filter(filter: string) {
     this.tableModel.setTableFilter(filter);
     this.scrollModel.setSize(this.tableModel.filteredRowCount);
     this.scrollModel.setPositionRatio(0);
-    this.updateViewport(BijViewportChangeAction.FILTER);
+    this.updateViewport(ViewportChangeAction.FILTER);
   }
 
   /**
@@ -95,7 +150,7 @@ export class BijTableComponent implements AfterViewInit, OnDestroy {
    * e.g. when scrolling or resizing the component.
    */
   @Output()
-  public viewportChange = new EventEmitter<BijViewportChangeEvent>();
+  public viewportChange = new EventEmitter<ViewportChangeEvent>();
 
   public ScrollDirection = ScrollDirection;
   public scrollModel = new TableScrollModel();
@@ -131,7 +186,7 @@ export class BijTableComponent implements AfterViewInit, OnDestroy {
         this.tableModel.invalidate();
         this.scrollModel.setSize(this.tableModel.filteredRowCount);
         this.scrollModel.setPositionRatio(0);
-        this.updateViewport(BijViewportChangeAction.FILTER);
+        this.updateViewport(ViewportChangeAction.FILTER);
       });
 
     // Listen to column sort changes to invalidate the table model
@@ -139,7 +194,7 @@ export class BijTableComponent implements AfterViewInit, OnDestroy {
       .takeUntil(this._destroy$)
       .subscribe(() => {
         this.tableModel.invalidate();
-        this.updateViewport(BijViewportChangeAction.SORT);
+        this.updateViewport(ViewportChangeAction.SORT);
       });
   }
 
@@ -157,7 +212,7 @@ export class BijTableComponent implements AfterViewInit, OnDestroy {
           this.tableModel.invalidate();
           this.scrollModel.setSize(this.tableModel.filteredRowCount);
           this.scrollToElementIdentity(this._startElementIdentity, false);
-          this.updateViewport(BijViewportChangeAction.DATA_SOURCE);
+          this.updateViewport(ViewportChangeAction.DATA_SOURCE);
         }
       });
   }
@@ -170,21 +225,24 @@ export class BijTableComponent implements AfterViewInit, OnDestroy {
     return this.tableModel.header ? [...this.tableModel.header.titleCells.toArray()] : [];
   }
 
-  public get rows(): BijRowDirective[] {
+  /**
+   * Returns the rows to be rendered in the viewport.
+   *
+   * @param sourceRowsIfGesture
+   *        'true' to return the gesture source rows instead of the live rows during a touch gesture.
+   */
+  public getRows(sourceRowsIfGesture: boolean): BijRowDirective[] {
     // TODO Verify how often this method gets called before every Angular version update
     // console.log('rows');
-    if (this._preservedHiddenRows.length > 0) {
-      return [...this._preservedHiddenRows, ...this.rowsInScrollRange];
+    if (this.isGestureActive() && sourceRowsIfGesture) {
+      return this._gestureSourceRows;
+    } else {
+      return this.rowsInScrollRange;
     }
-    return this.rowsInScrollRange;
   }
 
-  public isPreservedHiddenRow(rowIndex: number): boolean {
-    return rowIndex < this._preservedHiddenRows.length;
-  }
-
-  public get preservedHiddenRowCount(): number {
-    return this._preservedHiddenRows.length;
+  public isGestureActive(): boolean {
+    return this._gestureSourceRows.length > 0;
   }
 
   /**
@@ -195,7 +253,6 @@ export class BijTableComponent implements AfterViewInit, OnDestroy {
     return this._runningLastRangeComputation;
   }
 
-  // TODO indicate success via boolean return value
   public scrollToElement(element: any): void {
     const rowIndex = this.tableModel.filteredRows.findIndex(row => {
       return row.element && row.element === element;
@@ -227,26 +284,25 @@ export class BijTableComponent implements AfterViewInit, OnDestroy {
   public scrollToRow(rowIndex: number, updateViewport: boolean = true): void {
     this.scrollModel.setStart(rowIndex);
     if (updateViewport) {
-      this.updateViewport(BijViewportChangeAction.GOTO);
+      this.updateViewport(ViewportChangeAction.GOTO);
     }
   }
 
   public scrollToPosition(position: number): void {
     this.scrollModel.setPositionRatio(position);
-    this.updateViewport(BijViewportChangeAction.GOTO);
+    this.updateViewport(ViewportChangeAction.GOTO);
   }
 
   public onVerticalScroll(distance: number, stopSwipeScrolling: boolean = true): void {
     this.scrollModel.movePosition(distance);
-    this.updateViewport(distance < 0 ? BijViewportChangeAction.REWIND : BijViewportChangeAction.FORWARD);
+    this.updateViewport(distance < 0 ? ViewportChangeAction.REWIND : ViewportChangeAction.FORWARD);
     if (stopSwipeScrolling) {
       this._stopVerticalSwipeScrolling$.next();
     }
   }
 
   public onTouchStart(): void {
-    this._preservedHiddenRows = [...this.rowsInScrollRange];
-    this.updateViewport(BijViewportChangeAction.LAYOUT);
+    this._gestureSourceRows = [...this.rowsInScrollRange];
   }
 
   public onVerticalTouchScroll(event: TouchScrollEvent): void {
@@ -257,14 +313,14 @@ export class BijTableComponent implements AfterViewInit, OnDestroy {
   }
 
   public onTouchEnd(): void {
-    this._preservedHiddenRows = [];
-    this.updateViewport(BijViewportChangeAction.LAYOUT);
+    this._gestureSourceRows = [];
+    this.updateViewport(ViewportChangeAction.LAYOUT);
   }
 
   public onHorizontalTouchScroll(event: TouchScrollEvent): void {
-    const deltaPx = event.deltaRatio * this._viewportClientDimension.width;
+    const deltaPx = event.deltaRatio * this._viewportClientDimension.offsetWidth;
 
-    if (this.isHorizontalContentOverflow()) {
+    if (this.horizontalContentOverflow) {
       this.onHorizontalScroll(deltaPx / this.horizontalScrollWidth);
     }
   }
@@ -286,12 +342,15 @@ export class BijTableComponent implements AfterViewInit, OnDestroy {
     return this.scrollModel.rangeRatio < 1; // Do not delegate to 'isVerticalContentOverflow' because viewport DOM dimension is not applicable during 'updateViewport'.
   }
 
-  public get horizontalScrollbarVisible(): boolean {
-    return this._viewportClientDimension.width > this._viewportDimension.width;
+  /**
+   * Whether the content exceeds the viewport width.
+   */
+  public get horizontalContentOverflow(): boolean {
+    return this._viewportClientDimension.offsetWidth > this._viewportDimension.clientWidth;
   }
 
   public get horizontalScrollThumbSizeRatio(): number {
-    return this._viewportDimension.width / this._viewportClientDimension.width;
+    return this._viewportDimension.clientWidth / this._viewportClientDimension.offsetWidth;
   }
 
   public get horizontalScrollThumbPositionRatio(): number {
@@ -299,11 +358,11 @@ export class BijTableComponent implements AfterViewInit, OnDestroy {
   }
 
   public get scrollbarTopPx(): number {
-    return this._tableHeadDimension.height;
+    return this._tableHeadDimension.offsetHeight;
   }
 
   private get horizontalScrollWidth(): number {
-    return this._viewportClientDimension.width - this._viewportDimension.width;
+    return this._viewportClientDimension.offsetWidth - this._viewportDimension.clientWidth;
   }
 
   public onMouseWheel(event: WheelScrollEvent): void {
@@ -329,12 +388,12 @@ export class BijTableComponent implements AfterViewInit, OnDestroy {
 
   public onPageHome(event: KeyboardEvent): void {
     this.scrollModel.setPositionRatio(0);
-    this.updateViewport(BijViewportChangeAction.REWIND);
+    this.updateViewport(ViewportChangeAction.REWIND);
   }
 
   public onPageEnd(event: KeyboardEvent): void {
     this.scrollModel.setPositionRatio(1);
-    this.updateViewport(BijViewportChangeAction.FORWARD);
+    this.updateViewport(ViewportChangeAction.FORWARD);
   }
 
   public onViewportDimensionChange(dimension: Dimension): void {
@@ -356,15 +415,12 @@ export class BijTableComponent implements AfterViewInit, OnDestroy {
 
   /**
    * Forces a lay out of modelled columns and rows matching sort order and filter criteria.
-   *
-   * FIXME Because this component does manual change detection (detached), cell model changes are not reflected yet.
-   *       This has to be fixed, but still, this method should not be removed from API.
    */
   public layout(): void {
     this.tableModel.invalidate(); // in case a filter does not apply anymore
     this.scrollModel.setSize(this.tableModel.filteredRowCount);
     this.scrollModel.clearRange(); // to (re)compute the scrollbar thumb size, e.g. when shrinking the viewport height.
-    this.updateViewport(BijViewportChangeAction.LAYOUT);
+    this.updateViewport(ViewportChangeAction.LAYOUT);
   }
 
   /**
@@ -394,8 +450,8 @@ export class BijTableComponent implements AfterViewInit, OnDestroy {
   /**
    * Creates a new {TrData} which is given to 'tr-template' as implicit template variable.
    */
-  public newTrData(row: BijRowDirective, rowIndex: number, displayedRowIndex: number, childTemplateRef: TemplateRef<any>): TrData {
-    return {row, rowIndex, displayedRowIndex, childTemplateRef};
+  public newTrData(row: BijRowDirective, rowIndex: number, childTemplateRef: TemplateRef<any>, gestureSourceRow: boolean): TrData {
+    return {row, rowIndex, childTemplateRef, gestureSourceRow};
   }
 
   private get rowsInScrollRange(): BijRowDirective[] {
@@ -414,7 +470,7 @@ export class BijTableComponent implements AfterViewInit, OnDestroy {
    *
    * @param viewportChangeAction specifies the cause of the viewport change.
    */
-  private updateViewport(viewportChangeAction: BijViewportChangeAction): void {
+  private updateViewport(viewportChangeAction: ViewportChangeAction): void {
     if (this._runningUpdateViewport) {
       return
     }
@@ -427,11 +483,11 @@ export class BijTableComponent implements AfterViewInit, OnDestroy {
     this._changeDetector.detach();
     try {
       switch (viewportChangeAction) {
-        case BijViewportChangeAction.DATA_SOURCE:
-        case BijViewportChangeAction.FILTER:
-        case BijViewportChangeAction.LAYOUT:
-        case BijViewportChangeAction.HEADER:
-        case BijViewportChangeAction.SORT:
+        case ViewportChangeAction.DATA_SOURCE:
+        case ViewportChangeAction.FILTER:
+        case ViewportChangeAction.LAYOUT:
+        case ViewportChangeAction.HEADER:
+        case ViewportChangeAction.SORT:
           this.scrollModel.setLastRangeElementCount(this.computeLastRangeRowCount());
           break;
       }
@@ -450,13 +506,13 @@ export class BijTableComponent implements AfterViewInit, OnDestroy {
       action: viewportChangeAction,
       position: this.scrollModel.positionRatio,
       range: this.scrollModel.rangeRatio
-    } as BijViewportChangeEvent);
+    } as ViewportChangeEvent);
   }
 
   /**
    * Computes the number of elements in the viewport when scrolled to the end.
    */
- private computeLastRangeRowCount(): number {
+  private computeLastRangeRowCount(): number {
     const originalScrollModel = this.scrollModel;
     this._runningLastRangeComputation = true;
     try {
@@ -525,13 +581,6 @@ export class BijTableComponent implements AfterViewInit, OnDestroy {
    */
   private hasFreeVerticalSpace(): boolean {
     return !(this._viewportElement.scrollHeight > this._viewportElement.clientHeight);
-  }
-
-  /**
-   * Returns true if the content exceeds the viewport width.
-   */
-  private isHorizontalContentOverflow(): boolean {
-    return this._viewportElement.scrollWidth > this._viewportElement.clientWidth;
   }
 
   /**

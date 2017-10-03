@@ -4,7 +4,7 @@ import { BijUtils } from '../bij.utils';
 import { BijRowDirective } from './bij-row.directive';
 
 /**
- * Directive to be applied on HTML <TR> elements of {BijTableComponent}.
+ * Directive to be applied on HTML <tr> elements of {BijTableComponent}.
  *
  * This directive must be given an instance of {TrData} as its input value.
  */
@@ -24,7 +24,7 @@ export class BijTrDirective implements OnChanges {
 
   @HostBinding('class.display-none')
   public get cssClassDisplayNone(): boolean {
-    return this._tableComponent.isPreservedHiddenRow(this.data.rowIndex);
+    return this._tableComponent.isGestureActive() && this.data.gestureSourceRow;
   }
 
   @HostBinding('class.hidden')
@@ -46,6 +46,9 @@ export class BijTrDirective implements OnChanges {
 export interface TrData {
   row: BijRowDirective;
   rowIndex: number;
-  displayedRowIndex: number; // rowIndex - number of hidden rows
   childTemplateRef: TemplateRef<any>;
+  /**
+   * Indicates whether the associated row is a potential gesture source, and which must not be removed nor modified while the gesture takes place.
+   */
+  gestureSourceRow: boolean;
 }

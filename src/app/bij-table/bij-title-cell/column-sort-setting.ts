@@ -1,7 +1,6 @@
 import { SortDirection } from './sort-direction.enum';
 
-// TODO discuss naming, rename instances as well
-export interface ColumnSortSetting {
+export interface ColumnSortCriterion {
   direction: SortDirection;
   multi: boolean;
 }

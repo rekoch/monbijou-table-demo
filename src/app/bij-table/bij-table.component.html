@@ -44,18 +44,27 @@
            bijVerticalWheelScrollSupport
            (verticalWheelScroll)="onMouseWheel($event)">
 
-    <!-- TR -->
+      <!-- TR -->
+      <!-- While a touch gesture is active, the gesture's source rows must be kept in the DOM until the gesture completes. -->
+      <!-- Any modification (i.e. moving/removing these rows) would prevent further touch events and corrupt the gesture. -->
+      <!-- For that reason, the first, primary 'ng-container' is responsible for rendering the rows, but stops modifying the DOM while a touch gesture is in place. (see BijTableComponent.rows(...)) -->
+      <!-- In consequence, the second 'ng-container' then renders the rows until the gesture completes. -->
+      <ng-container [bijTemplateOutlet]="{templateRef: table_body_rows, context: { gestureSourceRow: true }}"></ng-container>
+      <ng-container *ngIf="isGestureActive()" [bijTemplateOutlet]="{templateRef: table_body_rows, context: { gestureSourceRow: false }}"></ng-container>
+    </tbody>
+  </table>
+
+  <ng-template #table_body_rows let-gestureSourceRow="gestureSourceRow">
     <ng-container
-      *ngFor="let row of rows; trackBy: trackByRowFn; let rowIndex=index;"
-      [bijTemplateOutlet]="{templateRef: row.trTemplateRef || tr_template, context: { $implicit: newTrData(row, rowIndex, rowIndex - preservedHiddenRowCount, body_row_template)}, identity: rowIndex}">
+      *ngFor="let row of getRows(gestureSourceRow); trackBy: trackByRowFn; let rowIndex=index;"
+      [bijTemplateOutlet]="{templateRef: row.trTemplateRef || tr_template, context: { $implicit: newTrData(row, rowIndex, body_row_template, gestureSourceRow)}, identity: rowIndex}">
 
       <!-- TD header-row-template with TD elements -->
       <ng-template #body_row_template>
         <td *ngFor="let cell of row.cells"><ng-container *ngTemplateOutlet="cell.templateRef"></ng-container></td>
       </ng-template>
     </ng-container>
-    </tbody>
-  </table>
+  </ng-template>
 
   <!-- Default <TR> head template -->
   <ng-template #tr_head_template let-trHeadData>
@@ -81,7 +90,7 @@
                (scroll)="onVerticalScroll($event)">
 </bij-scrollbar>
 
-<bij-scrollbar *ngIf="horizontalScrollbarVisible"
+<bij-scrollbar *ngIf="horizontalContentOverflow"
                [direction]="ScrollDirection.Horizontal"
                [thumbPosition]="horizontalScrollThumbPositionRatio"
                [thumbSize]="horizontalScrollThumbSizeRatio"

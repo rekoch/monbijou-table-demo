@@ -191,8 +191,6 @@ describe('TableScrollModel', () => {
   });
 });
 
-// TODO test all functionality of scroll model
-
 function incrementEnd(scrollModel: TableScrollModel, increment: number): void {
   for (let i = 0; i < increment; i++) {
     scrollModel.tryIncrementEnd();

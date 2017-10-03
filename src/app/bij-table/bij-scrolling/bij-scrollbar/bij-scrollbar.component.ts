@@ -15,7 +15,12 @@ export class BijScrollbarComponent implements OnDestroy {
   private _destroy$ = new Subject<void>();
 
   private _host: HTMLElement;
-  private _hostDimension: Dimension = { width: null, height: null };
+  private _hostDimension: Dimension = {
+    offsetWidth: 0,
+    offsetHeight: 0,
+    clientWidth: 0,
+    clientHeight: 0
+  };
   private _dragPosition: number;
 
   @Input()
@@ -155,8 +160,8 @@ export class BijScrollbarComponent implements OnDestroy {
 
   private get scrollRangePx(): number {
     const trackDimension = this._hostDimension;
-    const trackSizePx = this.vertical ? trackDimension.height : trackDimension.width;
-    const thumbSizePx = Math.max(trackSizePx * this.thumbSize, 20); // FIXME use constant for min-size
+    const trackSizePx = this.vertical ? trackDimension.clientHeight : trackDimension.clientWidth;
+    const thumbSizePx = Math.max(trackSizePx * this.thumbSize, 20);
     return trackSizePx - thumbSizePx;
   }
 }

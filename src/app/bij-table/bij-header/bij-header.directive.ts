@@ -4,6 +4,23 @@ import { BijTitleCellDirective, CompareFn, FilterFn, textCompareFn } from '../bi
 import { SortDirection } from '../bij-title-cell/sort-direction.enum';
 import { TableModel } from '../model/table.model';
 
+/**
+ * Represents the table header row and is similar to the HTML <tr> element in <thead> section.
+ *
+ * A header row is the container for a group of title cells, which specify sort and filter behavior for their respective column cells.
+ *
+ * This modelling directive will not be projected into the DOM, so do not style this element, nor install any event listeners.
+ * Instead, provide your custom template for HTML <tr> tag via 'trTemplateRef' input property.
+ *
+ * Example usage:
+ *
+ * <bij-table>
+ *   <bij-header>
+ *     <bij-title-cell><ng-template>firstname</ng-template></bij-title-cell>
+ *     <bij-title-cell><ng-template>lastname</ng-template></bij-title-cell>
+ *   </bij-header>
+ * </bij-table>
+ */
 @Directive({
   selector: 'bij-header'  // tslint:disable-line:directive-selector
 })
@@ -19,27 +36,24 @@ export class BijHeaderDirective implements AfterViewInit, OnDestroy {
    * Specifies whether to display the header row. By default, the header is visible.
    *
    * If set to false, this has the same effect as not model the header row at all,
-   * but still allows you to specify {FilterFn} in {BijTitleCellComponent} to control filtering.
+   * but still allows you to specify {FilterFn} in {BijTitleCellDirective} to control table filtering.
    */
   @Input()
   public visible = true;
 
   /**
-   * Specifies an optional {TemplateRef} which is rendered as this row's HTML <TR> tag.
+   * Specifies an optional {TemplateRef} which is rendered as this row's HTML <tr> tag.
    *
-   * A custom template allows to decorate the <TR> element, like to set CSS classes, or to install event listeners.
+   * A custom template allows to decorate the <tr> element, like to set CSS classes, or to install event listeners.
    *
    * The template must fulfill the following requirements:
-   *   - provide an empty 'ng-template' as its DOM child, which acts as the anchor where its <TD> children are inserted
-   *   - apply [bijTr] directive to the <TR> element, with the implicit template variable as its value
+   *   - provide an empty 'ng-template' as its DOM child, which acts as the anchor where its <th> children are inserted
+   *   - apply [bijTrHead] directive to the <tr> element, with the implicit template variable as its value
    *   - declare the template within the corresponding <bij-table> tag
-   *
-   * See the example below.
    *
    * The template is given the implicit template variable {TrHeadData} to access the associated 'header'.
    *
-   * ----
-   * Example:
+   * Example usage:
    *
    *   <bij-header [trTemplateRef]="tr_head_template">
    *     <bij-title-cell>...</bij-title-cell>

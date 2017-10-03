@@ -16,7 +16,12 @@ export class BijDimensionDirective implements DoCheck, OnDestroy {
 
   constructor(host: ElementRef, private _ngZone: NgZone) {
     this._host = host.nativeElement as HTMLElement;
-    this._dimension = {width: 0, height: 0};
+    this._dimension = {
+      offsetWidth: 0,
+      offsetHeight: 0,
+      clientWidth: 0,
+      clientHeight: 0
+    };
 
     this._ngZone.runOutsideAngular(() => { // run outside Angular zone to not trigger app ticks on every event
       Observable.fromEvent(window, 'resize')
@@ -35,11 +40,16 @@ export class BijDimensionDirective implements DoCheck, OnDestroy {
 
   private checkDimension(): void {
     const newDimension = {
-      width: this._host.clientWidth,
-      height: this._host.clientHeight
+      offsetWidth: this._host.offsetWidth,
+      offsetHeight: this._host.offsetHeight,
+      clientWidth: this._host.clientWidth,
+      clientHeight: this._host.clientHeight
     };
 
-    if (this._dimension.width === newDimension.width && this._dimension.height === newDimension.height) {
+    if (this._dimension.offsetWidth === newDimension.offsetWidth &&
+      this._dimension.offsetHeight === newDimension.offsetHeight &&
+      this._dimension.clientWidth === newDimension.clientWidth &&
+      this._dimension.clientHeight === newDimension.clientHeight) {
       return;
     }
 
@@ -51,6 +61,8 @@ export class BijDimensionDirective implements DoCheck, OnDestroy {
 }
 
 export interface Dimension {
-  width: number;
-  height: number;
+  offsetWidth: number;
+  offsetHeight: number;
+  clientWidth: number;
+  clientHeight: number;
 }
