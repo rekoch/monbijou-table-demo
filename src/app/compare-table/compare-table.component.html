@@ -1,28 +1,32 @@
 <div class="monbijou">
-  <div class="table">
-    <bij-table>
-      <bij-header>
-        <bij-title-cell><ng-template>ID</ng-template></bij-title-cell>
-        <bij-title-cell><ng-template>Firstname</ng-template></bij-title-cell>
-        <bij-title-cell><ng-template>Lastname</ng-template></bij-title-cell>
-      </bij-header>
-
-      <bij-row *ngFor="let person of personsMonbijou">
-        <bij-cell><ng-template>{{person.id}}</ng-template></bij-cell>
-        <bij-cell><ng-template><b>{{person.firstname}}</b></ng-template></bij-cell>
-        <bij-cell><ng-template>{{person.lastname}}</ng-template></bij-cell>
-      </bij-row>
-    </bij-table>
-  </div>
-
-  <div class="buttons">
-    <button (click)="addPersonMonbijou()">Add 1</button>
-    <button (click)="removePersonMonbijou()">Remove 1</button>
-    <button (click)="resetPersonsMonbijou()">Reset</button>
-    <button (click)="duplicateDataMonbijou()">Duplicate</button>
-    <button (click)="clearPersonsMonbijou()">Clear</button>
-  </div>
+  Coming soon: Monbijou Angular Table...
 </div>
+
+<!--<div class="monbijou">-->
+  <!--<div class="table">-->
+    <!--<bij-table>-->
+      <!--<bij-header>-->
+        <!--<bij-title-cell><ng-template>ID</ng-template></bij-title-cell>-->
+        <!--<bij-title-cell><ng-template>Firstname</ng-template></bij-title-cell>-->
+        <!--<bij-title-cell><ng-template>Lastname</ng-template></bij-title-cell>-->
+      <!--</bij-header>-->
+
+      <!--<bij-row *ngFor="let person of personsMonbijou">-->
+        <!--<bij-cell><ng-template>{{person.id}}</ng-template></bij-cell>-->
+        <!--<bij-cell><ng-template><b>{{person.firstname}}</b></ng-template></bij-cell>-->
+        <!--<bij-cell><ng-template>{{person.lastname}}</ng-template></bij-cell>-->
+      <!--</bij-row>-->
+    <!--</bij-table>-->
+  <!--</div>-->
+
+  <!--<div class="buttons">-->
+    <!--<button (click)="addPersonMonbijou()">Add 1</button>-->
+    <!--<button (click)="removePersonMonbijou()">Remove 1</button>-->
+    <!--<button (click)="resetPersonsMonbijou()">Reset</button>-->
+    <!--<button (click)="duplicateDataMonbijou()">Duplicate</button>-->
+    <!--<button (click)="clearPersonsMonbijou()">Clear</button>-->
+  <!--</div>-->
+<!--</div>-->
 
 <div class="native">
   <div class="table">
