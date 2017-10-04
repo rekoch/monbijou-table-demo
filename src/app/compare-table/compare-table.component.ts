@@ -16,10 +16,10 @@ export class CompareTableComponent {
   }
 
   public addPersonMonbijou(): void {
-    const lastIndex = this.personsMonbijou.length;
+    const newId = this.personsMonbijou.length + 1;
     const persons = this.getPersons();
     const randomIndex = Math.floor(Math.random() * persons.length);
-    this.personsMonbijou.push({...persons[randomIndex],  id: lastIndex + persons[randomIndex].id});
+    this.personsMonbijou.push({...persons[randomIndex],  id: newId});
   }
 
   public removePersonMonbijou(): void {
@@ -47,10 +47,10 @@ export class CompareTableComponent {
   }
 
   public addPersonNative(): void {
-    const lastIndex = this.personsNative.length;
+    const newId = this.personsNative.length + 1;
     const persons = this.getPersons();
     const randomIndex = Math.floor(Math.random() * persons.length);
-    this.personsNative.push({...persons[randomIndex],  id: lastIndex + persons[randomIndex].id});
+    this.personsNative.push({...persons[randomIndex],  id: newId});
   }
 
   public removePersonNative(): void {
