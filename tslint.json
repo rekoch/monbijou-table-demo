@@ -3,7 +3,6 @@
     "node_modules/codelyzer"
   ],
   "rules": {
-    "arrow-return-shorthand": true,
     "callable-types": true,
     "class-name": true,
     "comment-format": [
@@ -22,21 +21,27 @@
       true,
       "spaces"
     ],
+    "interface-name": [true, "never-prefix"],
     "interface-over-type-literal": true,
     "label-position": true,
     "max-line-length": [
       true,
-      140
+      400
     ],
     "member-access": false,
     "member-ordering": [
       true,
       {
         "order": [
-          "static-field",
-          "instance-field",
-          "static-method",
-          "instance-method"
+          "private-static-field",
+          "public-static-field",
+          "private-instance-field",
+          "public-instance-field",
+          "constructor",
+          "public-instance-method",
+          "private-instance-method",
+          "public-static-method",
+          "private-static-method"
         ]
       }
     ],
@@ -52,6 +57,7 @@
     ],
     "no-construct": true,
     "no-debugger": true,
+    "no-duplicate-variable": true,
     "no-duplicate-super": true,
     "no-empty": false,
     "no-empty-interface": true,
@@ -86,7 +92,6 @@
     ],
     "radix": true,
     "semicolon": [
-      true,
       "always"
     ],
     "triple-equals": [
@@ -102,6 +107,15 @@
         "property-declaration": "nospace",
         "variable-declaration": "nospace"
       }
+    ],
+    "typedef": [
+      true,
+      "call-signature",
+      "arrow-call-signature",
+      "parameter",
+      "property-declaration",
+      "object-destructuring",
+      "array-destructuring"
     ],
     "typeof-compare": true,
     "unified-signatures": true,
@@ -126,6 +140,11 @@
       "app",
       "kebab-case"
     ],
+    "pipe-naming": [
+      true,
+      "camelCase",
+      "app"
+    ],
     "use-input-property-decorator": true,
     "use-output-property-decorator": true,
     "use-host-property-decorator": true,
@@ -135,6 +154,36 @@
     "use-pipe-transform-interface": true,
     "component-class-suffix": true,
     "directive-class-suffix": true,
-    "invoke-injectable": true
+    "no-access-missing-member": true,
+    "templates-use-public": true,
+    "invoke-injectable": true,
+    "no-unsafe-finally": true,
+    "no-require-imports": true,
+    "max-classes-per-file": [
+      true,
+      1
+    ],
+    "arrow-return-shorthand": [
+      true
+    ],
+    "no-consecutive-blank-lines": true,
+    "object-literal-key-quotes": [
+      true,
+      "as-needed"
+    ],
+    "one-variable-per-declaration": true,
+    "ordered-imports": true,
+    "prefer-method-signature": true,
+    "align": [
+      true,
+      "statements"
+    ],
+    "no-angle-bracket-type-assertion": true,
+    "no-unused-variable": true,
+    "linebreak-style": [true, "LF"],
+    "trailing-comma": [false],
+    "arrow-parens": false,
+    "object-literal-shorthand": false,
+    "no-object-literal-type-assertion": false
   }
 }
